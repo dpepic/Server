@@ -8,11 +8,11 @@ public class Main
 		try
 		{
 			ServerSocket soket = new ServerSocket(1234);
+			(new serverGovori()).start();
 			while(true)
 			{
 				System.out.println("Cekam konekciju...");
-				Konekcija nekaKonekcija = new Konekcija(soket.accept());
-				nekaKonekcija.run();
+				(new Konekcija(soket.accept())).start();
 			}
 		} catch (IOException joj)
 		{
@@ -21,10 +21,30 @@ public class Main
 	}
 }
 
-class Konekcija
+class serverGovori extends Thread
+{
+	public void run()
+	{
+		while (true)
+		{
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			System.out.println("Unesi nesto: ");
+			try
+			{
+				Konekcija.test = br.readLine();
+			} catch (IOException joj)
+			{
+				joj.printStackTrace();
+			}
+		}
+	}
+}
+
+class Konekcija extends Thread
 {
 	Socket klijent; 
-	
+	static String test = "Ovo je kao poruka";
+
 	public Konekcija(Socket koSeKonektuje)
 	{
 		this.klijent = koSeKonektuje;
@@ -49,7 +69,7 @@ class Konekcija
 			while ((ulaz = bCitac.readLine()) != null)
 			{
 				ulaz = ulaz.toUpperCase(); 
-				bUpisivac.write("Server kaze: " + ulaz);
+				bUpisivac.write("Server kaze: " + ulaz + " ---- " + test);
 				bUpisivac.newLine();
 				bUpisivac.flush();
 			}
