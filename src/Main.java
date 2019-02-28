@@ -44,6 +44,7 @@ class serverGovori extends Thread
 class Konekcija extends Thread
 {
 	Socket klijent; 
+	public BufferedWriter bUpisivac;
 	static String test = "Ovo je kao poruka";
 	static Vector<Thread> sveNiti = new Vector<Thread>();
 
@@ -61,7 +62,7 @@ class Konekcija extends Thread
 
 			OutputStream slanje = klijent.getOutputStream();
 			OutputStreamWriter upisivac = new OutputStreamWriter(slanje);
-			BufferedWriter bUpisivac = new BufferedWriter(upisivac);
+			this.bUpisivac = new BufferedWriter(upisivac);
 
 			InputStream primanje = klijent.getInputStream();
 			InputStreamReader citac = new InputStreamReader(primanje);
@@ -72,8 +73,11 @@ class Konekcija extends Thread
 			while ((ulaz = bCitac.readLine()) != null)
 			{
 				ulaz = ulaz.toUpperCase(); 
-				this.posaljiPorukuKlijentu(bUpisivac, ulaz);
-				this.posaljiPorukuKlijentu(bUpisivac, test);		
+				
+				for(Thread nit: sveNiti)
+				{
+					((Konekcija)nit).posaljiPorukuKlijentu(ulaz);
+				}		
 			}
 		} catch (IOException joj)
 		{
@@ -81,13 +85,13 @@ class Konekcija extends Thread
 		}
 	}
 	
-	public void posaljiPorukuKlijentu(BufferedWriter gde, String sta)
+	public void posaljiPorukuKlijentu(String sta)
 	{
 		try
 		{
-			gde.write(sta);
-			gde.newLine();
-			gde.flush();
+			this.bUpisivac.write(sta);
+			this.bUpisivac.newLine();
+			this.bUpisivac.flush();
 		} catch (IOException joj)
 		{
 			joj.printStackTrace();
