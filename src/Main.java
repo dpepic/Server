@@ -1,4 +1,5 @@
 import java.net.*;
+import java.util.Vector;
 import java.io.*;
 
 public class Main 
@@ -44,10 +45,12 @@ class Konekcija extends Thread
 {
 	Socket klijent; 
 	static String test = "Ovo je kao poruka";
+	static Vector<Thread> sveNiti = new Vector<Thread>();
 
 	public Konekcija(Socket koSeKonektuje)
 	{
 		this.klijent = koSeKonektuje;
+		sveNiti.add(this);
 	}
 
 	public void run()
@@ -69,10 +72,22 @@ class Konekcija extends Thread
 			while ((ulaz = bCitac.readLine()) != null)
 			{
 				ulaz = ulaz.toUpperCase(); 
-				bUpisivac.write("Server kaze: " + ulaz + " ---- " + test);
-				bUpisivac.newLine();
-				bUpisivac.flush();
+				this.posaljiPorukuKlijentu(bUpisivac, ulaz);
+				this.posaljiPorukuKlijentu(bUpisivac, test);		
 			}
+		} catch (IOException joj)
+		{
+			joj.printStackTrace();
+		}
+	}
+	
+	public void posaljiPorukuKlijentu(BufferedWriter gde, String sta)
+	{
+		try
+		{
+			gde.write(sta);
+			gde.newLine();
+			gde.flush();
 		} catch (IOException joj)
 		{
 			joj.printStackTrace();
