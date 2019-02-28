@@ -1,6 +1,7 @@
 import java.net.*;
 import java.util.Vector;
 import java.io.*;
+import java.time.*;
 
 public class Main 
 {
@@ -9,7 +10,6 @@ public class Main
 		try
 		{
 			ServerSocket soket = new ServerSocket(1234);
-			(new serverGovori()).start();
 			while(true)
 			{
 				System.out.println("Cekam konekciju...");
@@ -22,30 +22,11 @@ public class Main
 	}
 }
 
-class serverGovori extends Thread
-{
-	public void run()
-	{
-		while (true)
-		{
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			System.out.println("Unesi nesto: ");
-			try
-			{
-				Konekcija.test = br.readLine();
-			} catch (IOException joj)
-			{
-				joj.printStackTrace();
-			}
-		}
-	}
-}
-
 class Konekcija extends Thread
 {
 	Socket klijent; 
 	public BufferedWriter bUpisivac;
-	static String test = "Ovo je kao poruka";
+	public String nik = null;
 	static Vector<Thread> sveNiti = new Vector<Thread>();
 
 	public Konekcija(Socket koSeKonektuje)
@@ -72,12 +53,31 @@ class Konekcija extends Thread
 
 			while ((ulaz = bCitac.readLine()) != null)
 			{
-				ulaz = ulaz.toUpperCase(); 
+				if (this.nik == null)
+				{
+					boolean nikPostoji = false;
+					for (Thread nit: sveNiti)
+					{                                    
+						if (((Konekcija)nit).nik != null && ((Konekcija)nit).nik.toLowerCase().equals(ulaz.toLowerCase()))
+							nikPostoji = true;
+					}
+					
+					if (nikPostoji)
+					{
+						this.posaljiPorukuKlijentu("Nik zauzet, izaberite drugi :(");
+						continue;
+					}
+						
+					
+					this.nik = ulaz;
+					this.posaljiPorukuKlijentu("Sada ste poznati kao: " + ulaz);
+					continue;
+				} 
 				
 				for(Thread nit: sveNiti)
-				{
-					((Konekcija)nit).posaljiPorukuKlijentu(ulaz);
-				}		
+				{                                                         //"11:31:48.565"     {"11:31:48", "565"}  
+					((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.nik + " kaze: " + ulaz);
+				}
 			}
 		} catch (IOException joj)
 		{
