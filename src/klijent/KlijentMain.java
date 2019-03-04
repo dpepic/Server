@@ -31,9 +31,7 @@ public class KlijentMain
 			BufferedWriter bUpisivac = new BufferedWriter(upisivac);
 
 			while (true) 
-			{
-				System.out.println("Unesite nesto: ");
-				
+			{	
 				String poruka = odKorisnika.readLine();
 
 				bUpisivac.write(poruka);

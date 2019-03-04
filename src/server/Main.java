@@ -25,9 +25,9 @@ public class Main
 
 class Konekcija extends Thread
 {
-	Socket klijent; 
+	Socket klijent;
+	public Korisnik koJe;
 	public BufferedWriter bUpisivac;
-	public String nik = null;
 	static Vector<Thread> sveNiti = new Vector<Thread>();
 
 	public Konekcija(Socket koSeKonektuje)
@@ -54,30 +54,33 @@ class Konekcija extends Thread
 
 			while ((ulaz = bCitac.readLine()) != null)
 			{
-				if (this.nik == null)
+				if (this.koJe == null)
 				{
-					boolean nikPostoji = false;
+					this.posaljiPorukuKlijentu("Unesite Vase korisnicko ime:");
+					
+					boolean korisnikPostoji = false;
 					for (Thread nit: sveNiti)
 					{                                    
-						if (((Konekcija)nit).nik != null && ((Konekcija)nit).nik.toLowerCase().equals(ulaz.toLowerCase()))
-							nikPostoji = true;
+						if (((Konekcija)nit).koJe != null && ((Konekcija)nit).koJe.toSamJa(ulaz))
+							korisnikPostoji = true;
 					}
 					
-					if (nikPostoji)
+					if (korisnikPostoji) //REFAKTORING GOLEMI OVDE!!!!
 					{
 						this.posaljiPorukuKlijentu("Nik zauzet, izaberite drugi :(");
 						continue;
 					}
 						
 					
-					this.nik = ulaz;
-					this.posaljiPorukuKlijentu("Sada ste poznati kao: " + ulaz);
+					this.koJe = new Korisnik(ulaz);
+					
+					this.posaljiPorukuKlijentu("Sada ste poznati kao: " + this.koJe.getUserName());
 					continue;
 				} 
 				
 				for(Thread nit: sveNiti)
 				{                                                         //"11:31:48.565"     {"11:31:48", "565"}  
-					((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.nik + " kaze: " + ulaz);
+					((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
 				}
 			}
 		} catch (IOException joj)
