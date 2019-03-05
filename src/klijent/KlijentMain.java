@@ -8,7 +8,7 @@ public class KlijentMain
 	{
 		try
 		{
-			Socket konekcija = new Socket("192.168.2.174", 1234);
+			Socket konekcija = new Socket("192.168.2.207", 1234);
 
 			InputStream saServera = konekcija.getInputStream();
 			InputStreamReader citac = new InputStreamReader(saServera);

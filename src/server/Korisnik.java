@@ -1,8 +1,14 @@
 package server;
 
-public class Korisnik 
+import java.io.Serializable;
+import java.util.Vector;
+
+public class Korisnik implements Serializable 
 {
+	private static final long serialVersionUID = 1L;
+	
 	String userName, pass, email;
+	static Vector<Korisnik> sviKorisnici = new Vector<Korisnik>();
 	
 	public Korisnik(String userName)
 	{
@@ -19,6 +25,11 @@ public class Korisnik
 	public String getEmail()
 	{
 		return this.email;
+	}
+	
+	public String getPass()
+	{
+		return this.pass;
 	}
 	
 	

@@ -6,15 +6,38 @@ import java.time.*;
 
 public class Main 
 {
-	public static void main(String[] args) 
+	public static void main(String[] argumenti)  
 	{
 		try
 		{
-			ServerSocket soket = new ServerSocket(1234);
+			System.out.println("Otvaram socket na portu: " + argumenti[0]);
+			(new serverConf()).start(); 
+			ServerSocket soket = new ServerSocket(Integer.parseInt(argumenti[0]));
 			while(true)
 			{
 				System.out.println("Cekam konekciju...");
 				(new Konekcija(soket.accept())).start();
+			}
+		} catch (IOException joj)
+		{
+			joj.printStackTrace();
+		}
+	}
+}
+
+class serverConf extends Thread
+{
+	public void run()
+	{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		try
+		{
+			String ulaz = br.readLine();
+			if (ulaz.equals("s"))
+			{
+				//Upis korisnika u fajl
+				//(ako ima novih)
+				
 			}
 		} catch (IOException joj)
 		{
@@ -29,6 +52,7 @@ class Konekcija extends Thread
 	public Korisnik koJe;
 	public BufferedWriter bUpisivac;
 	static Vector<Thread> sveNiti = new Vector<Thread>();
+	
 
 	public Konekcija(Socket koSeKonektuje)
 	{
@@ -56,6 +80,48 @@ class Konekcija extends Thread
 			{
 				if (this.koJe == null)
 				{
+					this.posaljiPorukuKlijentu("Napravite novi nalog? (d/n)");
+					if (ulaz.equals("d"))
+					{
+						
+						this.posaljiPorukuKlijentu("Unesite zeljeno korisnicko ime: ");
+						boolean postoji = false;
+						for (Korisnik k: Korisnik.sviKorisnici)
+						{
+							if (k.toSamJa(ulaz))
+								postoji = true;
+						}
+						if (postoji)
+						{
+							this.posaljiPorukuKlijentu("Nalog vec postoji!");
+							continue;
+						}
+						Korisnik novi = new Korisnik(ulaz);
+						boolean postojiMejl;
+						do
+						{
+							this.posaljiPorukuKlijentu("Unesite mejl: ");
+							postojiMejl = false;
+							for (Korisnik k: Korisnik.sviKorisnici)
+							{
+								if (k.getEmail().toLowerCase().equals((ulaz.toLowerCase())))
+									postojiMejl = true;
+							}
+						}while (postojiMejl && !novi.promeniMejl(ulaz));
+						
+						do
+						{
+							this.posaljiPorukuKlijentu("Unesite sifru: ");
+						}while(!novi.promeniSifru(ulaz));
+						
+						do
+						{
+							this.posaljiPorukuKlijentu("Unesite vasu izabranu sifru za proveru: ");
+						}while(!ulaz.equals(novi.getPass()));
+						continue;
+					}
+					else
+						//login
 					this.posaljiPorukuKlijentu("Unesite Vase korisnicko ime:");
 					
 					boolean korisnikPostoji = false;
@@ -67,7 +133,7 @@ class Konekcija extends Thread
 					
 					if (korisnikPostoji) //REFAKTORING GOLEMI OVDE!!!!
 					{
-						this.posaljiPorukuKlijentu("Nik zauzet, izaberite drugi :(");
+						this.posaljiPorukuKlijentu("Korisnicki nalog je vec ulogovan!!");
 						continue;
 					}
 						
