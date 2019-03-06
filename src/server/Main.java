@@ -13,6 +13,23 @@ public class Main
 			if (argumenti.length == 0)
 				argumenti = new String[] {"1234"};
 
+			System.out.println("Ucitavam podatke o korisnicma...");
+			FileInputStream fi = new FileInputStream("korisnici.obj");
+			ObjectInputStream oi = null;
+			try
+			{
+				oi = new ObjectInputStream(fi);
+				while (true)
+				{
+					Korisnik.sviKorisnici.add((Korisnik)oi.readObject());
+				}
+			} catch (IOException | ClassNotFoundException coolSmo)
+			{} finally
+			{
+				if (oi != null)
+					oi.close();
+			}
+			
 			System.out.println("Otvaram socket na portu: " + argumenti[0]);
 			(new serverConf()).start(); 
 			ServerSocket soket = new ServerSocket(Integer.parseInt(argumenti[0]));
@@ -46,8 +63,12 @@ class serverConf extends Thread
 
 				}
 			}
-			//SNIMIMO KORISNIKE I OSTALE PODATKE
-
+			
+			FileOutputStream fo = new FileOutputStream("korisnici.obj", false);
+			ObjectOutputStream oo = new ObjectOutputStream(fo);
+			for (Korisnik k: Korisnik.sviKorisnici)
+				oo.writeObject(k);
+			oo.close();
 		} catch (IOException joj)
 		{
 			joj.printStackTrace();
@@ -120,7 +141,13 @@ class Konekcija extends Thread
 							if (k.getEmail().toLowerCase().equals((ulaz.toLowerCase())))
 								postojiMejl = true;
 						}
-					} while (!serverConf.shutdown && postojiMejl && !novi.promeniMejl(ulaz));
+						if (postojiMejl)
+						{
+							this.posaljiPorukuKlijentu("Mejl adresa je vec zauzeta!");
+							continue;
+						}
+						
+					} while (!serverConf.shutdown && !novi.promeniMejl(ulaz));
 
 					do
 					{
@@ -133,11 +160,13 @@ class Konekcija extends Thread
 						this.posaljiPorukuKlijentu("Unesite vasu izabranu sifru za proveru: ");
 						ulaz = bCitac.readLine();
 					}while(!serverConf.shutdown && !ulaz.equals(novi.getPass()));
+					
 					this.posaljiPorukuKlijentu("Nalog uspesno kreiran!");
-					Korisnik.sviKorisnici.add(this.koJe);
+					Korisnik.sviKorisnici.add(novi); 
 					continue;
 				} else
 				{
+					Korisnik nalog = null;
 					this.posaljiPorukuKlijentu("Unesite Vase korisnicko ime:");
 					ulaz = bCitac.readLine();
 					
@@ -145,7 +174,10 @@ class Konekcija extends Thread
 					for (Korisnik k: Korisnik.sviKorisnici)
 					{
 						if (k.toSamJa(ulaz))
+						{
 							postoji = true;
+							nalog = k;
+						}
 					}
 					
 					if (postoji)
@@ -153,7 +185,7 @@ class Konekcija extends Thread
 						boolean ulogovan = false;
 						for (Thread nit: sveNiti)
 						{                                    
-							if (((Konekcija)nit).koJe != null && ((Konekcija)nit).koJe.toSamJa(ulaz))
+							if (((Konekcija)nit).koJe != null && ((Konekcija)nit).koJe.toSamJa(nalog.getUserName()))
 								ulogovan = true;
 						}
 						if (ulogovan)
@@ -162,9 +194,18 @@ class Konekcija extends Thread
 							continue;
 						} else
 						{
-							//Proverimo sifru
-						}
-							
+							this.posaljiPorukuKlijentu("Unesite Vasu sifru: ");
+							ulaz = bCitac.readLine();
+							if (nalog.getPass().equals(ulaz))
+							{
+								this.koJe = nalog;
+								this.posaljiPorukuKlijentu("Dobrodosli :)");
+							} else
+							{
+								this.posaljiPorukuKlijentu("Sifra nija tacna!");
+								continue;
+							}	
+						}	
 					} else
 					{
 						this.posaljiPorukuKlijentu("Nalog ne postoji!");
@@ -200,8 +241,9 @@ class Konekcija extends Thread
 				} 
 
 				for(Thread nit: sveNiti)
-				{                                                         //"11:31:48.565"     {"11:31:48", "565"}  
-					((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
+				{ 
+					if (((Konekcija)nit).koJe != null)
+						((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
 				}
 			}
 

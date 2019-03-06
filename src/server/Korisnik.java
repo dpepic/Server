@@ -8,6 +8,8 @@ public class Korisnik implements Serializable
 	private static final long serialVersionUID = 1L;
 	
 	String userName, pass, email;
+	Vector<String> sobe = new Vector<String>();
+	
 	static Vector<Korisnik> sviKorisnici = new Vector<Korisnik>();
 	
 	public Korisnik(String userName)
@@ -24,7 +26,10 @@ public class Korisnik implements Serializable
 	//Getter
 	public String getEmail()
 	{
-		return this.email;
+		if (this.email != null)
+			return this.email;
+		else
+			return "";
 	}
 	
 	public String getPass()
@@ -36,12 +41,9 @@ public class Korisnik implements Serializable
 	//Setter
 	public boolean promeniMejl(String eMail)
 	{
-		if ((eMail.split("@")).length == 2)
-		{
+		//DOMACI NAPRAVITI PROVERU MEJLA :) :) 
 			this.email = eMail;
 			return true;
-		} else
-			return false;
 	}
 	
 	//Setter
