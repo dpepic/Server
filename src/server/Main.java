@@ -29,7 +29,7 @@ public class Main
 				if (oi != null)
 					oi.close();
 			}
-			
+
 			System.out.println("Otvaram socket na portu: " + argumenti[0]);
 			(new serverConf()).start(); 
 			ServerSocket soket = new ServerSocket(Integer.parseInt(argumenti[0]));
@@ -63,7 +63,7 @@ class serverConf extends Thread
 
 				}
 			}
-			
+
 			FileOutputStream fo = new FileOutputStream("korisnici.obj", false);
 			ObjectOutputStream oo = new ObjectOutputStream(fo);
 			for (Korisnik k: Korisnik.sviKorisnici)
@@ -146,7 +146,7 @@ class Konekcija extends Thread
 							this.posaljiPorukuKlijentu("Mejl adresa je vec zauzeta!");
 							continue;
 						}
-						
+
 					} while (!serverConf.shutdown && !novi.promeniMejl(ulaz));
 
 					do
@@ -160,7 +160,7 @@ class Konekcija extends Thread
 						this.posaljiPorukuKlijentu("Unesite vasu izabranu sifru za proveru: ");
 						ulaz = bCitac.readLine();
 					}while(!serverConf.shutdown && !ulaz.equals(novi.getPass()));
-					
+
 					this.posaljiPorukuKlijentu("Nalog uspesno kreiran!");
 					Korisnik.sviKorisnici.add(novi); 
 					continue;
@@ -169,7 +169,7 @@ class Konekcija extends Thread
 					Korisnik nalog = null;
 					this.posaljiPorukuKlijentu("Unesite Vase korisnicko ime:");
 					ulaz = bCitac.readLine();
-					
+
 					boolean postoji = false;
 					for (Korisnik k: Korisnik.sviKorisnici)
 					{
@@ -179,7 +179,7 @@ class Konekcija extends Thread
 							nalog = k;
 						}
 					}
-					
+
 					if (postoji)
 					{
 						boolean ulogovan = false;
@@ -213,42 +213,32 @@ class Konekcija extends Thread
 					}
 				}	
 			}
-				
+
 			//Ovde zvanicno pocinje chat :D
 			while (!serverConf.shutdown && (ulaz = bCitac.readLine()) != null)
-			{
-				if (this.koJe == null)
+			{     
+
+				if (ulaz.startsWith("/"))
 				{
-
-					boolean korisnikPostoji = false;
-					for (Thread nit: sveNiti)
-					{                                    
-						if (((Konekcija)nit).koJe != null && ((Konekcija)nit).koJe.toSamJa(ulaz))
-							korisnikPostoji = true;
-					}
-
-					if (korisnikPostoji) //REFAKTORING GOLEMI OVDE!!!!
+					switch (ulaz.split(" ")[0])
 					{
-						this.posaljiPorukuKlijentu("Korisnicki nalog je vec ulogovan!!");
-						continue;
+						case "/test":
+							this.posaljiPorukuKlijentu("Cujemo se ;)");
+							if (ulaz.split(" ").length > 1)
+								this.posaljiPorukuKlijentu("Imamo i parametar: " + 
+							                               ulaz.split(" ")[1]);
+							break;
 					}
-
-
-					this.koJe = new Korisnik(ulaz);
-
-					this.posaljiPorukuKlijentu("Sada ste poznati kao: " + this.koJe.getUserName());
-					continue;
-				} 
-
-				for(Thread nit: sveNiti)
-				{ 
-					if (((Konekcija)nit).koJe != null)
-						((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
+				} else
+				{
+					for(Thread nit: sveNiti)
+					{ 
+						if (((Konekcija)nit).koJe != null)
+							((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
+					}
 				}
 			}
-
 			this.posaljiPorukuKlijentu("Server se gasi!");
-
 		} catch (IOException joj)
 		{
 			joj.printStackTrace();

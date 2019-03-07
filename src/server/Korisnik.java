@@ -8,7 +8,7 @@ public class Korisnik implements Serializable
 	private static final long serialVersionUID = 1L;
 	
 	String userName, pass, email;
-	Vector<String> sobe = new Vector<String>();
+	Vector<Soba> sobe = new Vector<Soba>();
 	
 	static Vector<Korisnik> sviKorisnici = new Vector<Korisnik>();
 	
