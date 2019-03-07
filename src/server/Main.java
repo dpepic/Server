@@ -10,7 +10,8 @@ public class Main
 	{
 		try
 		{
-			if (argumenti.length == 0)
+			if (argumenti.length == 0) //Mozemo da podesimo port
+				//koristeci java server.Main 1234 preko argumenta
 				argumenti = new String[] {"1234"};
 
 			System.out.println("Ucitavam podatke o korisnicma...");

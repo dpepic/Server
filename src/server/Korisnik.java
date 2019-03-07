@@ -3,13 +3,19 @@ package server;
 import java.io.Serializable;
 import java.util.Vector;
 
+//Serializable je tu da bi mogli da upisujemo objekte
+//ovo klase u fajl :) 
 public class Korisnik implements Serializable 
 {
+	//Ovo slobodno ignorisemo, deo implementacije Serializable
 	private static final long serialVersionUID = 1L;
 	
 	String userName, pass, email;
 	Vector<Soba> sobe = new Vector<Soba>();
+	//Korisnik moze da bude u vise soba pa pamti u kojima je 
+	//trenutno
 	
+	//Vektor u kome pamtimo sve REGISTROVANE korisnike
 	static Vector<Korisnik> sviKorisnici = new Vector<Korisnik>();
 	
 	public Korisnik(String userName)
@@ -27,7 +33,7 @@ public class Korisnik implements Serializable
 	public String getEmail()
 	{
 		if (this.email != null)
-			return this.email;
+			return this.email;    
 		else
 			return "";
 	}
@@ -43,7 +49,7 @@ public class Korisnik implements Serializable
 	{
 		//DOMACI NAPRAVITI PROVERU MEJLA :) :) 
 			this.email = eMail;
-			return true;
+			return true;      
 	}
 	
 	//Setter
