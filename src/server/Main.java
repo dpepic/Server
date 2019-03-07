@@ -63,7 +63,6 @@ class serverConf extends Thread
 
 				}
 			}
-
 			FileOutputStream fo = new FileOutputStream("korisnici.obj", false);
 			ObjectOutputStream oo = new ObjectOutputStream(fo);
 			for (Korisnik k: Korisnik.sviKorisnici)
@@ -220,6 +219,7 @@ class Konekcija extends Thread
 
 				if (ulaz.startsWith("/"))
 				{
+					boolean zavrsetak = false;
 					switch (ulaz.split(" ")[0])
 					{
 						case "/test":
@@ -228,7 +228,13 @@ class Konekcija extends Thread
 								this.posaljiPorukuKlijentu("Imamo i parametar: " + 
 							                               ulaz.split(" ")[1]);
 							break;
+						case "/konec":
+							zavrsetak = true;
+							break;
+							
 					}
+					if (zavrsetak)
+						break;
 				} else
 				{
 					for(Thread nit: sveNiti)
@@ -238,7 +244,12 @@ class Konekcija extends Thread
 					}
 				}
 			}
-			this.posaljiPorukuKlijentu("Server se gasi!");
+			if (serverConf.shutdown)
+				this.posaljiPorukuKlijentu("Server se gasi!");
+			else
+				this.posaljiPorukuKlijentu("Hvala na poseti :)");
+			this.koJe = null;
+			this.klijent.close();
 		} catch (IOException joj)
 		{
 			joj.printStackTrace();
