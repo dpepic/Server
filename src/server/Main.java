@@ -10,6 +10,10 @@ public class Main
 	{
 		try
 		{
+			new Soba("General chat", "gc"); //Pravimo sobu za sve korisnike
+		      //Posto ovo radimo na samom startu imamo
+		     //garanciju da je ova soba uvek I u vektoru sveSobe
+			
 			if (argumenti.length == 0) //Mozemo da podesimo port
 				//koristeci java server.Main 1234 preko argumenta
 				argumenti = new String[] {"1234"};
@@ -31,6 +35,8 @@ public class Main
 					oi.close();
 			}
 
+			
+			
 			System.out.println("Otvaram socket na portu: " + argumenti[0]);
 			(new serverConf()).start(); 
 			ServerSocket soket = new ServerSocket(Integer.parseInt(argumenti[0]));
@@ -199,6 +205,7 @@ class Konekcija extends Thread
 							if (nalog.getPass().equals(ulaz))
 							{
 								this.koJe = nalog;
+								this.koJe.sobe.add(Soba.sveSobe.get(0));
 								this.posaljiPorukuKlijentu("Dobrodosli :)");
 							} else
 							{
@@ -229,6 +236,61 @@ class Konekcija extends Thread
 								this.posaljiPorukuKlijentu("Imamo i parametar: " + 
 							                               ulaz.split(" ")[1]);
 							break;
+						case "/napravi":
+							if (ulaz.split(" ").length == 1)
+								this.posaljiPorukuKlijentu("Niste naveli sobu!");
+							else
+							{
+								if (ulaz.split(" ").length == 3)
+								{
+									Soba s = new Soba(ulaz.split(" ")[1], 
+											          ulaz.split(" ")[2]);
+									this.koJe.sobe.add(s);
+								} else
+									this.posaljiPorukuKlijentu("Navedite i alias, npr /napravi generalChat gc");
+							}
+							break;
+						case "/udji":
+							if (ulaz.split(" ").length == 1)
+								this.posaljiPorukuKlijentu("Niste naveli sobu!");
+							else
+							{
+								Soba s = Soba.dajSobu(ulaz.split(" ")[1]);
+								if (s == null)
+								{
+									this.posaljiPorukuKlijentu("Soba ne postoji!");
+								} else
+								{
+									this.koJe.sobe.add(s);
+									this.koJe.aktivnaSoba = s;
+									this.posaljiPorukuKlijentu("Dobrodosli u " + s.naziv);
+									s.dodajKorisnika();
+								}
+							}
+								break;
+						case "/izadji":
+							if (ulaz.split(" ").length == 1)
+								this.posaljiPorukuKlijentu("Niste uneli sobu!");
+							else
+							{       //ZA DOMACI NAPRAVITI DA SE KORISNIKU JAVI
+								    //I KADA NIJE IZASAO IZ SOBE
+								for (Soba s: this.koJe.sobe)
+									if (s.alias.equals(ulaz.split(" ")[1]))
+									{
+										this.koJe.sobe.remove(s);
+										if (this.koJe.aktivnaSoba == s)
+											this.koJe.aktivnaSoba = Soba.sveSobe.get(0);
+										this.posaljiPorukuKlijentu("Izasli ste iz sobe.");
+										break;
+									}
+							}
+							break;
+						case "/gdeSam":
+							this.posaljiPorukuKlijentu("Nalazite se u:");
+							for(Soba s: this.koJe.sobe)
+								if (s.naziv != null)
+									this.posaljiPorukuKlijentu("+ " + s.naziv);
+							break;
 						case "/konec":
 							zavrsetak = true;
 							break;
@@ -236,12 +298,23 @@ class Konekcija extends Thread
 					}
 					if (zavrsetak)
 						break;
+				} else if(ulaz.startsWith("@"))
+				{
+					//DOMACI -- PRIJAVITI KORISNIKU DA NIJE USPEO
+					//DA ODABERE SOBU
+					String alias = ulaz.substring(1).split(" ")[0];
+					for (Soba s: this.koJe.sobe)
+						if (s.alias.equals(alias))
+						{
+							this.koJe.aktivnaSoba = s;
+							this.posaljiPorukuKlijentu("Pricate na " + s.naziv);
+						}
 				} else
 				{
 					for(Thread nit: sveNiti)
 					{ 
-						if (((Konekcija)nit).koJe != null)
-							((Konekcija)nit).posaljiPorukuKlijentu("[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
+						if (((Konekcija)nit).koJe != null && ((Konekcija)nit).koJe.sobe.contains(this.koJe.aktivnaSoba))
+							((Konekcija)nit).posaljiPorukuKlijentu("[" + this.koJe.aktivnaSoba.alias + "]" + "[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
 					}
 				}
 			}

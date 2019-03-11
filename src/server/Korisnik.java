@@ -12,6 +12,7 @@ public class Korisnik implements Serializable
 	
 	String userName, pass, email;
 	Vector<Soba> sobe = new Vector<Soba>();
+	Soba aktivnaSoba = Soba.sveSobe.get(0);
 	//Korisnik moze da bude u vise soba pa pamti u kojima je 
 	//trenutno
 	
