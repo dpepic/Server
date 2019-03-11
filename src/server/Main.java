@@ -11,9 +11,9 @@ public class Main
 		try
 		{
 			new Soba("General chat", "gc"); //Pravimo sobu za sve korisnike
-		      //Posto ovo radimo na samom startu imamo
-		     //garanciju da je ova soba uvek I u vektoru sveSobe
-			
+			//Posto ovo radimo na samom startu imamo
+			//garanciju da je ova soba uvek I u vektoru sveSobe
+
 			if (argumenti.length == 0) //Mozemo da podesimo port
 				//koristeci java server.Main 1234 preko argumenta
 				argumenti = new String[] {"1234"};
@@ -35,8 +35,8 @@ public class Main
 					oi.close();
 			}
 
-			
-			
+
+
 			System.out.println("Otvaram socket na portu: " + argumenti[0]);
 			(new serverConf()).start(); 
 			ServerSocket soket = new ServerSocket(Integer.parseInt(argumenti[0]));
@@ -230,71 +230,111 @@ class Konekcija extends Thread
 					boolean zavrsetak = false;
 					switch (ulaz.split(" ")[0])
 					{
-						case "/test":
-							this.posaljiPorukuKlijentu("Cujemo se ;)");
-							if (ulaz.split(" ").length > 1)
-								this.posaljiPorukuKlijentu("Imamo i parametar: " + 
-							                               ulaz.split(" ")[1]);
-							break;
-						case "/napravi":
-							if (ulaz.split(" ").length == 1)
-								this.posaljiPorukuKlijentu("Niste naveli sobu!");
-							else
+					case "/test":
+						this.posaljiPorukuKlijentu("Cujemo se ;)");
+						if (ulaz.split(" ").length > 1)
+							this.posaljiPorukuKlijentu("Imamo i parametar: " + 
+									ulaz.split(" ")[1]);
+						break;
+					case "/napravi":
+						if (ulaz.split(" ").length == 1)
+							this.posaljiPorukuKlijentu("Niste naveli sobu!");
+						else
+						{
+							if (ulaz.split(" ").length == 3)
 							{
-								if (ulaz.split(" ").length == 3)
-								{
-									Soba s = new Soba(ulaz.split(" ")[1], 
-											          ulaz.split(" ")[2]);
-									this.koJe.sobe.add(s);
-								} else
-									this.posaljiPorukuKlijentu("Navedite i alias, npr /napravi generalChat gc");
+								Soba s = new Soba(ulaz.split(" ")[1], 
+										ulaz.split(" ")[2]);
+								this.koJe.sobe.add(s);
+							} else
+								this.posaljiPorukuKlijentu("Navedite i alias, npr /napravi generalChat gc");
+						}
+						break;
+					case "/udji":
+						if (ulaz.split(" ").length == 1)
+							this.posaljiPorukuKlijentu("Niste naveli sobu!");
+						else
+						{
+							Soba s = Soba.dajSobu(ulaz.split(" ")[1]);
+							if (s == null)
+							{
+								this.posaljiPorukuKlijentu("Soba ne postoji!");
+							} else
+							{
+								this.koJe.sobe.add(s);
+								this.koJe.aktivnaSoba = s;
+								this.posaljiPorukuKlijentu("Dobrodosli u " + s.naziv);
+								s.dodajKorisnika();
 							}
-							break;
-						case "/udji":
-							if (ulaz.split(" ").length == 1)
-								this.posaljiPorukuKlijentu("Niste naveli sobu!");
-							else
-							{
-								Soba s = Soba.dajSobu(ulaz.split(" ")[1]);
-								if (s == null)
+						}
+						break;
+					case "/izadji":
+						if (ulaz.split(" ").length == 1)
+							this.posaljiPorukuKlijentu("Niste uneli sobu!");
+						else
+						{       //ZA DOMACI NAPRAVITI DA SE KORISNIKU JAVI
+							//I KADA NIJE IZASAO IZ SOBE
+							for (Soba s: this.koJe.sobe)
+								if (s.alias.equals(ulaz.split(" ")[1]))
 								{
-									this.posaljiPorukuKlijentu("Soba ne postoji!");
-								} else
-								{
-									this.koJe.sobe.add(s);
-									this.koJe.aktivnaSoba = s;
-									this.posaljiPorukuKlijentu("Dobrodosli u " + s.naziv);
-									s.dodajKorisnika();
+									this.koJe.sobe.remove(s);
+									if (this.koJe.aktivnaSoba == s)
+										this.koJe.aktivnaSoba = Soba.sveSobe.get(0);
+									this.posaljiPorukuKlijentu("Izasli ste iz sobe.");
+									break;
 								}
+						}
+						break;
+						
+						//ZA DOMACI -- REFAKTORISATI DA RADI U JEDNOJ LINIJI
+						//NA PRIMER, /nadimak noviNadimak
+					case "/nadimak":
+						this.posaljiPorukuKlijentu("Unesite novo korisnicko ime: ");
+						ulaz = bCitac.readLine();
+						boolean postoji = false;
+						for(Korisnik k: Korisnik.sviKorisnici) {
+							if(k.toSamJa(ulaz)) {
+								postoji = true;
 							}
-								break;
-						case "/izadji":
-							if (ulaz.split(" ").length == 1)
-								this.posaljiPorukuKlijentu("Niste uneli sobu!");
-							else
-							{       //ZA DOMACI NAPRAVITI DA SE KORISNIKU JAVI
-								    //I KADA NIJE IZASAO IZ SOBE
-								for (Soba s: this.koJe.sobe)
-									if (s.alias.equals(ulaz.split(" ")[1]))
-									{
-										this.koJe.sobe.remove(s);
-										if (this.koJe.aktivnaSoba == s)
-											this.koJe.aktivnaSoba = Soba.sveSobe.get(0);
-										this.posaljiPorukuKlijentu("Izasli ste iz sobe.");
-										break;
-									}
-							}
-							break;
-						case "/gdeSam":
-							this.posaljiPorukuKlijentu("Nalazite se u:");
-							for(Soba s: this.koJe.sobe)
-								if (s.naziv != null)
-									this.posaljiPorukuKlijentu("+ " + s.naziv);
-							break;
-						case "/konec":
-							zavrsetak = true;
-							break;
-							
+						}
+						if(postoji) {
+							this.posaljiPorukuKlijentu("Korisnicko ime vec postoji! ");
+
+						}
+						else {
+							this.koJe.userName = ulaz;
+							this.posaljiPorukuKlijentu("Nadimak je uspesno promenjen! ");
+						}
+						break;
+//					case "/kick":
+//						this.posaljiPorukuKlijentu("Unesite korisnicko ime koje zelite da izbacite");
+//						ulaz = bCitac.readLine();
+//						postoji =  false;
+//						Korisnik izbacen = null;
+//						for(Korisnik k: Korisnik.sviKorisnici) {
+//							if(k.toSamJa(ulaz)) {
+//								postoji = true;
+//								izbacen = k;
+//							}
+//						}
+//						if(postoji) {
+//							Korisnik.sviKorisnici.remove(izbacen);
+//							this.posaljiPorukuKlijentu("Korisnik " + ulaz + " je izbacen");
+//						}
+//						else {
+//							this.posaljiPorukuKlijentu("Odabrali ste nepostojece korisnicko ime");
+//						}
+//						break;
+					case "/gdeSam":
+						this.posaljiPorukuKlijentu("Nalazite se u:");
+						for(Soba s: this.koJe.sobe)
+							if (s.naziv != null)
+								this.posaljiPorukuKlijentu("+ " + s.naziv);
+						break;
+					case "/konec":
+						zavrsetak = true;
+						break;
+
 					}
 					if (zavrsetak)
 						break;
