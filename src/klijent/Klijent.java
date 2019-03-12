@@ -2,10 +2,10 @@ package klijent;
 import java.net.*;
 import java.io.*;
 
-public class KlijentMain 
+public class Klijent 
 {
 
-	public static void main(String[] args) 
+	public static void pokreniKonekciju() 
 	{
 		try
 		{
