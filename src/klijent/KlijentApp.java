@@ -6,6 +6,8 @@ import javax.swing.JFrame;
 import javax.swing.SwingWorker;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
@@ -34,7 +36,7 @@ public class KlijentApp {
 				try 
 				{
 					KlijentApp window = new KlijentApp();
-					window.frame.setVisible(true);
+					//window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -76,11 +78,24 @@ public class KlijentApp {
 
 		};
 		radnik.execute();
+		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
-
+		
+		Login prozor = new Login();
+		prozor.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosed(WindowEvent zatvoren)
+			{
+				frame.setVisible(true);
+			}
+				
+		});
+		prozor.setVisible(true);
+		
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.SOUTH);
 
