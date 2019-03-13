@@ -87,7 +87,7 @@ class Konekcija extends Thread
 	Socket klijent;
 	public Korisnik koJe = null;
 	public BufferedWriter bUpisivac;
-	static Vector<Thread> sveNiti = new Vector<Thread>();
+	static Vector<Konekcija> sveNiti = new Vector<Konekcija>();
 
 
 	public Konekcija(Socket koSeKonektuje)
@@ -112,7 +112,7 @@ class Konekcija extends Thread
 
 			String ulaz;
 
-			while (!serverConf.shutdown && this.koJe == null)
+			/*while (!serverConf.shutdown && this.koJe == null)
 			{
 				this.posaljiPorukuKlijentu("Napravite novi nalog? (d/n)");
 				ulaz = bCitac.readLine();
@@ -219,7 +219,7 @@ class Konekcija extends Thread
 						continue;
 					}
 				}	
-			}
+			}*/
 
 			//Ovde zvanicno pocinje chat :D
 			while (!serverConf.shutdown && (ulaz = bCitac.readLine()) != null)
@@ -230,11 +230,40 @@ class Konekcija extends Thread
 					boolean zavrsetak = false;
 					switch (ulaz.split(" ")[0])
 					{
-					case "/test":
-						this.posaljiPorukuKlijentu("Cujemo se ;)");
-						if (ulaz.split(" ").length > 1)
-							this.posaljiPorukuKlijentu("Imamo i parametar: " + 
-									ulaz.split(" ")[1]);
+					case "/login":
+						if (ulaz.split(" ").length != 3)
+							this.posaljiPorukuKlijentu("Koristite format /login nick sifra");
+						else
+						{
+							String nick = ulaz.split(" ")[1];
+							String pass = ulaz.split(" ")[2];
+							for (Korisnik k: Korisnik.sviKorisnici)
+							{
+								if (k.userName.equals(nick))
+								{
+									boolean ulogovan = false;
+									for (Konekcija nit : sveNiti)
+									{
+										if (nit.koJe == k)
+											ulogovan = true;
+									}
+									if (ulogovan)
+										this.posaljiPorukuKlijentu("Nalog vec ulogovan! FBI je informisan!!");
+									else
+									{
+										if (pass.equals(k.pass))
+										{
+											this.koJe = k;
+											this.posaljiPorukuKlijentu("Uspesno ste ulogovani :)");
+											break;
+										} else
+										{
+											this.posaljiPorukuKlijentu("Nalog ili sifra nije u redu!");
+										}
+									}
+								}
+							}
+						}
 						break;
 					case "/napravi":
 						if (ulaz.split(" ").length == 1)
@@ -351,10 +380,10 @@ class Konekcija extends Thread
 						}
 				} else
 				{
-					for(Thread nit: sveNiti)
+					for(Konekcija nit: sveNiti)
 					{ 
-						if (((Konekcija)nit).koJe != null && ((Konekcija)nit).koJe.sobe.contains(this.koJe.aktivnaSoba))
-							((Konekcija)nit).posaljiPorukuKlijentu("[" + this.koJe.aktivnaSoba.alias + "]" + "[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
+						if (nit.koJe != null && nit.koJe.sobe.contains(this.koJe.aktivnaSoba))
+							nit.posaljiPorukuKlijentu("[" + this.koJe.aktivnaSoba.alias + "]" + "[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
 					}
 				}
 			}
