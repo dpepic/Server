@@ -110,8 +110,8 @@ class Konekcija extends Thread
 			InputStreamReader citac = new InputStreamReader(primanje);
 			BufferedReader bCitac = new BufferedReader(citac);
 
-			String ulaz;
-
+			String ulaz ="";
+			this.posaljiPorukuKlijentu("Dobrdosli na server :)");
 			/*while (!serverConf.shutdown && this.koJe == null)
 			{
 				this.posaljiPorukuKlijentu("Napravite novi nalog? (d/n)");
@@ -222,12 +222,15 @@ class Konekcija extends Thread
 			}*/
 
 			//Ovde zvanicno pocinje chat :D
-			while (!serverConf.shutdown && (ulaz = bCitac.readLine()) != null)
-			{     
-
-				if (ulaz.startsWith("/"))
-				{
-					boolean zavrsetak = false;
+			while (!serverConf.shutdown && ulaz != null)
+			{
+				if (this.koJe != null)
+					ulaz = bCitac.readLine();
+				//Ovo nam je petlja iz koje ne pustamo
+				//korisnika dok se ne uloguje
+				while (!serverConf.shutdown && this.koJe == null && ulaz != null)
+				{ 
+					ulaz = bCitac.readLine();
 					switch (ulaz.split(" ")[0])
 					{
 					case "/login":
@@ -237,10 +240,12 @@ class Konekcija extends Thread
 						{
 							String nick = ulaz.split(" ")[1];
 							String pass = ulaz.split(" ")[2];
+							boolean korisnikPostoji = false;
 							for (Korisnik k: Korisnik.sviKorisnici)
 							{
 								if (k.userName.equals(nick))
 								{
+									korisnikPostoji = true;
 									boolean ulogovan = false;
 									for (Konekcija nit : sveNiti)
 									{
@@ -263,8 +268,52 @@ class Konekcija extends Thread
 									}
 								}
 							}
+							if (!korisnikPostoji)
+								this.posaljiPorukuKlijentu("Nalog ili sifra nije u redu!;) ;)");
 						}
 						break;
+					case "/napraviNalog":
+						if (ulaz.split(" ").length != 4)
+							this.posaljiPorukuKlijentu("Koristite format /napraviNalog user pass mail!");
+						else
+						{  
+							String user = ulaz.split(" ")[1];
+							String pass = ulaz.split(" ")[2];
+							String mail = ulaz.split(" ")[3];
+							
+							boolean kPostoji = false;
+							for (Korisnik k: Korisnik.sviKorisnici)
+							{
+								if (k.userName.equals(user))
+								{
+									kPostoji = true;
+									this.posaljiPorukuKlijentu("Nalog vec postoji!");
+									break;
+								}
+							}
+							if (kPostoji)
+								continue;
+							else
+							{
+								//ZA DOMACI
+							}
+						}
+						break;
+					default:
+						this.posaljiPorukuKlijentu("Niste ulogovani! " 
+								+ "Koristite /login user pass ili napravite " 
+								+ "nalog sa /napraviNalog user pass mail");
+					}
+				}
+				
+				if(ulaz.startsWith("/login"))
+					ulaz = "";
+				
+				if (ulaz.startsWith("/"))
+				{
+					boolean zavrsetak = false;
+					switch (ulaz.split(" ")[0])
+					{
 					case "/napravi":
 						if (ulaz.split(" ").length == 1)
 							this.posaljiPorukuKlijentu("Niste naveli sobu!");
@@ -314,7 +363,7 @@ class Konekcija extends Thread
 								}
 						}
 						break;
-						
+
 						//ZA DOMACI -- REFAKTORISATI DA RADI U JEDNOJ LINIJI
 						//NA PRIMER, /nadimak noviNadimak
 					case "/nadimak":
@@ -335,25 +384,25 @@ class Konekcija extends Thread
 							this.posaljiPorukuKlijentu("Nadimak je uspesno promenjen! ");
 						}
 						break;
-//					case "/kick":
-//						this.posaljiPorukuKlijentu("Unesite korisnicko ime koje zelite da izbacite");
-//						ulaz = bCitac.readLine();
-//						postoji =  false;
-//						Korisnik izbacen = null;
-//						for(Korisnik k: Korisnik.sviKorisnici) {
-//							if(k.toSamJa(ulaz)) {
-//								postoji = true;
-//								izbacen = k;
-//							}
-//						}
-//						if(postoji) {
-//							Korisnik.sviKorisnici.remove(izbacen);
-//							this.posaljiPorukuKlijentu("Korisnik " + ulaz + " je izbacen");
-//						}
-//						else {
-//							this.posaljiPorukuKlijentu("Odabrali ste nepostojece korisnicko ime");
-//						}
-//						break;
+						//					case "/kick":
+						//						this.posaljiPorukuKlijentu("Unesite korisnicko ime koje zelite da izbacite");
+						//						ulaz = bCitac.readLine();
+						//						postoji =  false;
+						//						Korisnik izbacen = null;
+						//						for(Korisnik k: Korisnik.sviKorisnici) {
+						//							if(k.toSamJa(ulaz)) {
+						//								postoji = true;
+						//								izbacen = k;
+						//							}
+						//						}
+						//						if(postoji) {
+						//							Korisnik.sviKorisnici.remove(izbacen);
+						//							this.posaljiPorukuKlijentu("Korisnik " + ulaz + " je izbacen");
+						//						}
+						//						else {
+						//							this.posaljiPorukuKlijentu("Odabrali ste nepostojece korisnicko ime");
+						//						}
+						//						break;
 					case "/gdeSam":
 						this.posaljiPorukuKlijentu("Nalazite se u:");
 						for(Soba s: this.koJe.sobe)
