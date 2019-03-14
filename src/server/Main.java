@@ -87,6 +87,7 @@ class Konekcija extends Thread
 	Socket klijent;
 	public Korisnik koJe = null;
 	public BufferedWriter bUpisivac;
+	public BufferedReader bCitac;
 	static Vector<Konekcija> sveNiti = new Vector<Konekcija>();
 
 
@@ -108,7 +109,7 @@ class Konekcija extends Thread
 
 			InputStream primanje = klijent.getInputStream();
 			InputStreamReader citac = new InputStreamReader(primanje);
-			BufferedReader bCitac = new BufferedReader(citac);
+			this.bCitac = new BufferedReader(citac);
 
 			String ulaz ="";
 			this.posaljiPorukuKlijentu("Dobrdosli na server :)");
@@ -312,6 +313,7 @@ class Konekcija extends Thread
 										Korisnik novi = new Korisnik(user);
 										novi.pass = pass;
 										novi.email = mail;
+										novi.sobe.add(Soba.sveSobe.get(0));
 										Korisnik.sviKorisnici.add(novi);
 										this.posaljiPorukuKlijentu("Uspesno ste napravili nalog!");
 									} else
@@ -436,7 +438,7 @@ class Konekcija extends Thread
 							if (s.naziv != null)
 								this.posaljiPorukuKlijentu("+ " + s.naziv);
 						break;
-					case "/konec":
+					case "/logout":
 						zavrsetak = true;
 						break;
 
@@ -459,18 +461,23 @@ class Konekcija extends Thread
 					
 					for(Konekcija nit: sveNiti)
 					{ 
-						//this.posaljiPorukuKlijentu(nit.koJe.getUserName());
-						//if (nit.koJe != null && nit.koJe.sobe.contains(this.koJe.aktivnaSoba))
+						if (nit.koJe != null && nit.koJe.sobe.contains(this.koJe.aktivnaSoba))
 							nit.posaljiPorukuKlijentu("[" + this.koJe.aktivnaSoba.alias + "]" + "[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
 					}
 				}
 			}
+			
 			if (serverConf.shutdown)
 				this.posaljiPorukuKlijentu("Server se gasi!");
 			else
 				this.posaljiPorukuKlijentu("Hvala na poseti :)");
+			
+			System.out.println("Gasimo konekciju");
 			this.koJe = null;
+			this.bCitac.close();
+			this.bUpisivac.close();
 			this.klijent.close();
+			Thread.yield();
 		} catch (IOException joj)
 		{
 			joj.printStackTrace();
