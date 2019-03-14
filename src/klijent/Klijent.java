@@ -12,7 +12,7 @@ public class Klijent
 	{
 		try
 		{
-			konekcija = new Socket("192.168.2.207", 1234);
+			konekcija = new Socket("192.168.1.8", 1234);
 			
 			OutputStream kaServeru = konekcija.getOutputStream();
 			OutputStreamWriter upisivac = new OutputStreamWriter(kaServeru);

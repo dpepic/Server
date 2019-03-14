@@ -291,11 +291,35 @@ class Konekcija extends Thread
 									break;
 								}
 							}
-							if (kPostoji)
-								continue;
-							else
+							if (!kPostoji)
 							{
-								//ZA DOMACI
+								boolean mPostoji = false;
+								for(Korisnik k: Korisnik.sviKorisnici)
+								{
+									if (k.getEmail().equals(mail))
+									{
+										mPostoji = true;
+										this.posaljiPorukuKlijentu("E-mail se vec koristi!");
+										break;
+									}
+								}
+								if (!mPostoji)
+								{
+									this.posaljiPorukuKlijentu("Potvrdite sifru.");
+									ulaz = bCitac.readLine();
+									if (pass.equals(ulaz))
+									{
+										Korisnik novi = new Korisnik(user);
+										novi.pass = pass;
+										novi.email = mail;
+										Korisnik.sviKorisnici.add(novi);
+										this.posaljiPorukuKlijentu("Uspesno ste napravili nalog!");
+									} else
+									{
+										this.posaljiPorukuKlijentu("Sifra se ne slaze!");
+										
+									}
+								}
 							}
 						}
 						break;
@@ -307,7 +331,10 @@ class Konekcija extends Thread
 				}
 				
 				if(ulaz.startsWith("/login"))
-					ulaz = "";
+				{
+					this.posaljiPorukuKlijentu("Dobrodosli :)");
+					continue;
+				}
 				
 				if (ulaz.startsWith("/"))
 				{
@@ -429,9 +456,11 @@ class Konekcija extends Thread
 						}
 				} else
 				{
+					
 					for(Konekcija nit: sveNiti)
 					{ 
-						if (nit.koJe != null && nit.koJe.sobe.contains(this.koJe.aktivnaSoba))
+						//this.posaljiPorukuKlijentu(nit.koJe.getUserName());
+						//if (nit.koJe != null && nit.koJe.sobe.contains(this.koJe.aktivnaSoba))
 							nit.posaljiPorukuKlijentu("[" + this.koJe.aktivnaSoba.alias + "]" + "[" + LocalTime.now().toString().split("\\.")[0] + "] " + this.koJe.getUserName() + " kaze: " + ulaz);
 					}
 				}
