@@ -350,6 +350,8 @@ class Konekcija extends Thread
 						{
 							if (ulaz.split(" ").length == 3)
 							{
+								//Proci foreach petljom kroz sobe i videti
+								//imali li vec alias i naziv
 								Soba s = new Soba(ulaz.split(" ")[1], 
 										ulaz.split(" ")[2]);
 								this.koJe.sobe.add(s);
