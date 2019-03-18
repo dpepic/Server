@@ -8,11 +8,11 @@ public class Klijent
 	static BufferedWriter bUpisivac;
 	static BufferedReader bCitac;
 	
-	public static void pokreniKonekciju() 
+	public static void pokreniKonekciju(String IP, int port) 
 	{
 		try
 		{
-			konekcija = new Socket("192.168.1.8", 1234);
+			konekcija = new Socket(IP, port);
 			
 			OutputStream kaServeru = konekcija.getOutputStream();
 			OutputStreamWriter upisivac = new OutputStreamWriter(kaServeru);

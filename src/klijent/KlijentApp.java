@@ -20,12 +20,18 @@ import java.awt.Font;
 import javax.swing.JTextField;
 import java.awt.Component;
 import javax.swing.SwingConstants;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 public class KlijentApp {
 
 	private JFrame frame;
 	JTextArea txtChat = new JTextArea();
 	private JTextField txtUnos;
+	private String IP;
+	private int port;
+	private boolean konektovan;
 
 	public static void main(String[] args) 
 	{	
@@ -51,55 +57,43 @@ public class KlijentApp {
 
 	private void initialize() 
 	{
-		Klijent.pokreniKonekciju();
-		SwingWorker<Void, String> radnik = new SwingWorker<Void, String>()
-		{
-			protected Void doInBackground()
-			{
-				while (true)
-				{
-					try
-					{
-						Thread.sleep(1000);
-						publish(Klijent.primiPoruku());
-					} catch (Exception e)
-					{
-						
-					}
-				}
-			}
-			
-			protected void process(List<String> saServera)
-			{
-				String rez = saServera.get(saServera.size() - 1);
-				if (!rez.equals(""))
-					txtChat.append(rez);
-			}
 
-		};
-		radnik.execute();
-		
+
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
-		
-		Login prozor = new Login();
+
+		/*Login prozor = new Login();
 		prozor.addWindowListener(new WindowAdapter()
 		{
 			@Override
 			public void windowClosed(WindowEvent zatvoren)
 			{
 				frame.setVisible(true);
+				if (!prozor.signUp)
+					Klijent.posaljiPoruku(String.format("/login %s %s", 
+											prozor.korisnicko, 
+						                    prozor.sifra));
+				else
+				{
+					Klijent.posaljiPoruku(String.format("/napraviNalog %s %s %s", 
+							                 prozor.korisnicko,
+							                 prozor.sifra,
+							                 prozor.email));
+					Klijent.posaljiPoruku(prozor.sifra);
+				}
 			}
-				
-		});
+
+		}); 
 		prozor.setVisible(true);
-		
+		 */
+		frame.setVisible(true);
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.SOUTH);
 
 		JButton btnPosalji = new JButton("Posalji");
+		btnPosalji.setToolTipText("Blah blah blah");
 		btnPosalji.addActionListener(new ActionListener() 
 		{
 			public void actionPerformed(ActionEvent e) 
@@ -127,6 +121,103 @@ public class KlijentApp {
 
 
 		scrollPane.setViewportView(txtChat);
+
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+
+		JMenu mnMeni = new JMenu("Meni");
+		menuBar.add(mnMeni);
+
+		JMenuItem mntmLogout = new JMenuItem("Logout");
+		mntmLogout.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent arg0) 
+			{
+				if (konektovan)
+				{
+					Klijent.posaljiPoruku("/logout");
+					konektovan = false;
+				}
+			}
+		});
+
+		JMenuItem mntmOpcije = new JMenuItem("Opcije");
+		mntmOpcije.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				dlgOpcije op = new dlgOpcije();
+				op.addWindowListener(new WindowAdapter()
+				{
+					@Override
+					public void windowClosed(WindowEvent zatvoren)
+					{
+						if (op.promena)
+						{
+							IP = op.IP;
+							port = op.port;
+						}
+					}
+				});
+				op.setVisible(true);
+			}
+		});
+
+		JMenuItem mntmKonektujSe = new JMenuItem("Konektuj se");
+		mntmKonektujSe.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent arg0)
+			{
+				if (!konektovan)
+				{
+					Klijent.pokreniKonekciju(IP, port);
+					SwingWorker<Void, String> radnik = new SwingWorker<Void, String>()
+					{
+						protected Void doInBackground()
+						{
+							while (true)
+							{
+								try
+								{
+									Thread.sleep(1000);
+									publish(Klijent.primiPoruku());
+								} catch (Exception e)
+								{
+
+								}
+							}
+						}
+
+						protected void process(List<String> saServera)
+						{
+							String rez = saServera.get(saServera.size() - 1);
+							if (!rez.equals(""))
+								txtChat.append(rez);
+						}
+
+					};
+					radnik.execute();
+					konektovan = true;
+				}
+			}
+		});
+		mnMeni.add(mntmKonektujSe);
+		mnMeni.add(mntmOpcije);
+		mnMeni.add(mntmLogout);
+
+		JMenuItem mntmSobe = new JMenuItem("Sobe");
+		mntmSobe.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				if (konektovan) 
+				{
+					dlgSobe sobe = new dlgSobe();
+					sobe.setVisible(true);
+				}
+			}
+		});
+		menuBar.add(mntmSobe);
 
 	}
 

@@ -221,15 +221,15 @@ class Konekcija extends Thread
 					}
 				}	
 			}*/
-
+			boolean zavrsetak = false;
 			//Ovde zvanicno pocinje chat :D
-			while (!serverConf.shutdown && ulaz != null)
+			while (!zavrsetak && !serverConf.shutdown && ulaz != null)
 			{
 				if (this.koJe != null)
 					ulaz = bCitac.readLine();
 				//Ovo nam je petlja iz koje ne pustamo
 				//korisnika dok se ne uloguje
-				while (!serverConf.shutdown && this.koJe == null && ulaz != null)
+				while (!zavrsetak && !serverConf.shutdown && this.koJe == null && ulaz != null)
 				{ 
 					ulaz = bCitac.readLine();
 					switch (ulaz.split(" ")[0])
@@ -325,6 +325,9 @@ class Konekcija extends Thread
 							}
 						}
 						break;
+					case "/logout":
+						zavrsetak = true;
+						break;
 					default:
 						this.posaljiPorukuKlijentu("Niste ulogovani! " 
 								+ "Koristite /login user pass ili napravite " 
@@ -340,7 +343,7 @@ class Konekcija extends Thread
 				
 				if (ulaz.startsWith("/"))
 				{
-					boolean zavrsetak = false;
+					
 					switch (ulaz.split(" ")[0])
 					{
 					case "/napravi":
