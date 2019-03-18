@@ -441,8 +441,16 @@ class Konekcija extends Thread
 						this.posaljiPorukuKlijentu("Nalazite se u:");
 						for(Soba s: this.koJe.sobe)
 							if (s.naziv != null)
-								this.posaljiPorukuKlijentu("+ " + s.naziv);
+								this.posaljiPorukuKlijentu("Alias: " + s.alias + " Naziv: "+ s.naziv + " + Clanova: " + s.brojKorisnika);
+						this.posaljiPorukuKlijentu("To e to!");
 						break;
+					case "/izlistajSobe":
+						this.posaljiPorukuKlijentu("Postoje sobe:");
+						for (Soba s: Soba.sveSobe)
+							if (s.naziv != null)
+								this.posaljiPorukuKlijentu("Alias: " + s.alias + " Naziv: "+ s.naziv + " + Clanova: " + s.brojKorisnika);
+						this.posaljiPorukuKlijentu("Konec!");
+					break;
 					case "/logout":
 						zavrsetak = true;
 						break;

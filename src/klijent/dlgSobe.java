@@ -2,6 +2,7 @@ package klijent;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -10,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 
 public class dlgSobe extends JDialog {
@@ -17,23 +19,48 @@ public class dlgSobe extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private JTable table;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		try {
-			dlgSobe dialog = new dlgSobe();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	/**
 	 * Create the dialog.
 	 */
-	public dlgSobe() {
+	public dlgSobe() 
+	{
+		Klijent.posaljiPoruku("/izlistajSobe");
+		SwingWorker<Void, String> listaSobe = new SwingWorker<Void,String>()
+				{
+
+					@Override
+					protected Void doInBackground() throws Exception 
+					{
+						String stari = KlijentApp.rez;
+						while (!KlijentApp.rez.equals("Konec!"))
+						{
+							if (!KlijentApp.rez.equals(stari))
+							{
+								System.out.println(stari);
+								stari = KlijentApp.rez;
+								publish(stari);
+							}
+							Thread.sleep(500);
+							
+						}
+						return null;
+					}
+					
+					protected void process(List<String> rezultati)
+					{
+						String linija = rezultati.get(rezultati.size() - 1);
+						//Alias: gc Naziv:General chat + Clanova: 1
+						String[] red = linija.split(": ");
+						if (!linija.equals("Postoje sobe:") || !linija.equals("Konec!"))
+							((DefaultTableModel)table.getModel()).addRow(red);
+					}
+			
+				};
+				
+				listaSobe.execute();
+
+		
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

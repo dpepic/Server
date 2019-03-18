@@ -32,6 +32,7 @@ public class KlijentApp {
 	private String IP;
 	private int port;
 	private boolean konektovan;
+	static String rez;
 
 	public static void main(String[] args) 
 	{	
@@ -190,7 +191,7 @@ public class KlijentApp {
 
 						protected void process(List<String> saServera)
 						{
-							String rez = saServera.get(saServera.size() - 1);
+							rez = saServera.get(saServera.size() - 1);
 							if (!rez.equals(""))
 								txtChat.append(rez);
 						}
